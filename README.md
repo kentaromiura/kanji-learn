@@ -2,6 +2,9 @@
 
 A PWA prototype for learning kanji through vocabulary context, review flows, and quick recognition drills.
 
+Available at https://cristian.tokyo/kanji 
+Feel free to [Install it](https://developer.mozilla.org/en-US/docs/Web/Progressive_web_apps/Guides/Installing) and keep it forever (as that's the amount of time it takes to learn kanji)
+
 ## Data Sources
 
 - Kanji order is intended to follow the local KKLC ordering data.
