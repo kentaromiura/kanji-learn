@@ -845,44 +845,58 @@ let gradeSrsCard: (string, int) => unit = %raw(`(id, rating) => {
     }
   };
   const w = [
-    0.041, 2.4175, 4.1283, 11.9709,
-    5.6385, 0.4468, 3.262,
-    2.3054, 0.1688, 1.3325, 0.3524, 0.0049, 0.7503, 0.0896, 0.6625, 1.3,
-    0.882, 0.3072, 3.5875, 0.303, 0.0107, 0.2279, 2.6413, 0.5594, 1.3,
-    2.5, 1.0,
-    0.0723, 0.1634, 0.5, 0.9555, 0.2245, 0.6232, 0.1362, 0.3862
+    // FSRS-7 dual-trace default parameters from open-spaced-repetition/fsrs-rs PR #426.
+    0.1104, 2.2395, 3.9221, 11.7841,
+    6.1686, 0.6457, 3.6807,
+    1.9795, 0.0, 1.3826, 0.7024, 0.5999, 0.8146, 0.6398, 1.0,
+    1.3207, 0.6707, 3.8668, 0.4416, 0.0934, 1.8631, 0.6162, 1.0869,
+    0.1567, 0.0801, 0.2421, 0.9464, 0.1433, 0.7145, 0.0, 0.5667, 0.3734, 0.5333, 0.3048
   ];
   const requestRetention = 0.9;
   const day = 24 * 60 * 60 * 1000;
+  const sMin = 0.001;
+  const sMax = 36500;
   const clamp = (value, min, max) => Math.min(max, Math.max(min, value));
   const initD = grade => w[4] - Math.exp(w[5] * (grade - 1)) + 1;
   const meanReversion = (init, current) => 0.01 * init + 0.99 * current;
   const linearDamping = (deltaD, oldD) => deltaD * (10 - oldD) / 9;
-  const nextD = (oldD, grade) => {
-    const deltaD = -w[6] * (grade - 3);
+  const nextD = (oldD, grade, retrievability) => {
+    const baseDelta = -w[6] * (grade - 3);
+    const deltaD = grade === 1 ? baseDelta * (retrievability + 0.1) : baseDelta;
     return clamp(meanReversion(initD(4), oldD + linearDamping(deltaD, oldD)), 1, 10);
   };
-  const forgettingCurve = (elapsedDays, stability) => {
-    const s = Math.max(0.001, stability);
-    const tOverS = Math.max(0, elapsedDays) / s;
-    const powerLaw = (base, decay) => {
-      const factor = Math.pow(base, 1 / decay) - 1;
-      return Math.pow(1 + factor * tOverS, decay);
-    };
-    const r1 = powerLaw(w[29], -w[27]);
-    const r2 = powerLaw(w[30], -w[28]);
-    const weight1 = w[31] * Math.pow(s, -w[33]);
-    const weight2 = w[32] * Math.pow(s, w[34]);
-    return clamp((weight1 * r1 + weight2 * r2) / (weight1 + weight2), 0.0001, 0.9999);
+  const fastRecall = (elapsedDays, stabilityFast) => {
+    const t = Math.max(0, elapsedDays);
+    const sFast = clamp(stabilityFast, sMin, sMax);
+    const decay1Mag = clamp(w[23] * Math.pow(sFast, w[33] - 0.3), 0.01, 0.95);
+    const decay1 = -decay1Mag;
+    const factor1 = Math.exp(Math.min(Math.log(w[25]) / decay1, 60)) - 1;
+    return Math.pow(1 + factor1 * (t / sFast), decay1);
+  };
+  const forgettingCurve = (elapsedDays, stability, stabilityFast, difficulty) => {
+    const t = Math.max(0, elapsedDays);
+    const s = Math.max(sMin, stability);
+    const sFast = Math.max(sMin, stabilityFast);
+    const d = clamp(difficulty, 1, 10);
+    const decay1Mag = clamp(w[23] * Math.pow(sFast, w[33] - 0.3), 0.01, 0.95);
+    const decay1 = -decay1Mag;
+    const factor1 = Math.exp(Math.min(Math.log(w[25]) / decay1, 60)) - 1;
+    const r1 = Math.pow(1 + factor1 * (t / sFast), decay1);
+    const decay2 = -clamp(w[24], 0.01, 0.95);
+    const factor2 = Math.pow(w[26], 1 / decay2) - 1;
+    const dTimescale = Math.exp((d - 5) * (w[32] - 0.3));
+    const r2 = Math.pow(1 + factor2 * dTimescale * (t / s), decay2);
+    const weight1 = w[27] * Math.pow(sFast, -w[29]);
+    const weight2 = w[28] * Math.pow(s, w[30]) * Math.exp((d - 5) * (w[31] - 0.5));
+    return clamp(((weight1 * r1 + weight2 * r2) / Math.max(1e-9, weight1 + weight2)) * (1 - 2e-5) + 1e-5, 0.0001, 0.9999);
   };
   const stabilityPair = (oldS, oldD, retrievability, grade, baseIndex) => {
-    const hardPenalty = grade === 2 ? w[baseIndex + 7] : 1;
-    const easyBonus = grade === 4 ? w[baseIndex + 8] : 1;
+    const hardPenalty = grade === 2 ? w[baseIndex + 6] : 1;
+    const easyBonus = grade === 4 ? w[baseIndex + 7] : 1;
     const fail = (
       w[baseIndex + 3] *
-      Math.pow(oldD, -w[baseIndex + 4]) *
-      (Math.pow(oldS + 1, w[baseIndex + 5]) - 1) *
-      Math.exp((1 - retrievability) * w[baseIndex + 6])
+      (Math.pow(oldS + 1, w[baseIndex + 4]) - 1) *
+      Math.exp((1 - retrievability) * w[baseIndex + 5])
     );
     const pls = Math.min(oldS, fail);
     const sinc = (
@@ -894,21 +908,23 @@ let gradeSrsCard: (string, int) => unit = %raw(`(id, rating) => {
       hardPenalty *
       easyBonus
     );
-    return grade > 1 ? Math.max(pls, oldS * sinc) : pls;
+    return clamp(grade > 1 ? Math.max(pls, oldS * sinc) : pls, sMin, sMax);
   };
-  const transition = elapsedDays => 1 - w[26] * Math.exp(-w[25] * Math.max(0, elapsedDays));
-  const intervalFor = stability => {
-    let lo = 1 / (24 * 60);
-    let hi = 36500;
-    for (let i = 0; i < 80; i++) {
+  const intervalFor = (stability, stabilityFast, difficulty) => {
+    let lo = 0;
+    let hi = Math.max(stability, stabilityFast, 1);
+    while (forgettingCurve(hi, stability, stabilityFast, difficulty) > requestRetention && hi < sMax) {
+      hi = Math.min(hi * 2, sMax);
+    }
+    for (let i = 0; i < 50; i++) {
       const mid = (lo + hi) / 2;
-      if (forgettingCurve(mid, stability) > requestRetention) {
+      if (forgettingCurve(mid, stability, stabilityFast, difficulty) > requestRetention) {
         lo = mid;
       } else {
         hi = mid;
       }
     }
-    return clamp((lo + hi) / 2, lo, 36500);
+    return clamp((lo + hi) / 2, 0, sMax);
   };
   let cards = {};
   try {
@@ -918,41 +934,45 @@ let gradeSrsCard: (string, int) => unit = %raw(`(id, rating) => {
   if (!card) return;
   const now = Date.now();
   const oldStability = Math.max(0, Number(card.stability || 0));
+  const oldStabilityFast = Math.max(0, Number(card.stabilityFast || card.stability || 0));
   const oldDifficulty = clamp(Number(card.difficulty || 0) || 5, 1, 10);
   const lastReview = Number(card.lastReview || 0);
   const elapsedDays = lastReview > 0 ? Math.max(0, (now - lastReview) / day) : 0;
   const reps = Number(card.reps || 0) + 1;
   let stability;
+  let stabilityFast;
   let difficulty;
+  let retrievability = 1;
   let state;
   if (!oldStability || card.state === "new" || reps === 1) {
     stability = w[clamp(rating, 1, 4) - 1];
+    stabilityFast = stability;
     difficulty = clamp(initD(rating), 1, 10);
     state = rating === 1 ? "learning" : "review";
   } else {
-    const retrievability = forgettingCurve(elapsedDays, oldStability);
-    const longTermS = stabilityPair(oldStability, oldDifficulty, retrievability, rating, 7);
-    const shortTermS = stabilityPair(oldStability, oldDifficulty, retrievability, rating, 16);
-    const coefficient = transition(elapsedDays);
-    stability = clamp(coefficient * longTermS + (1 - coefficient) * shortTermS, 0.001, 36500);
-    difficulty = nextD(oldDifficulty, rating);
+    retrievability = forgettingCurve(elapsedDays, oldStability, oldStabilityFast, oldDifficulty);
+    stability = stabilityPair(oldStability, oldDifficulty, retrievability, rating, 7);
+    const fast = stabilityPair(oldStabilityFast, oldDifficulty, fastRecall(elapsedDays, oldStabilityFast), rating, 15);
+    stabilityFast = rating === 1 ? Math.min(fast, stability * 0.8) : fast;
+    difficulty = nextD(oldDifficulty, rating, retrievability);
     state = rating === 1 ? "learning" : "review";
   }
-  const intervalDays = rating === 1 ? Math.min(intervalFor(stability), 10 / (24 * 60)) : intervalFor(stability);
+  const intervalDays = rating === 1 ? Math.min(intervalFor(stability, stabilityFast, difficulty), 10 / (24 * 60)) : intervalFor(stability, stabilityFast, difficulty);
   card.reps = reps;
   card.stability = Number(stability.toFixed(3));
+  card.stabilityFast = Number(stabilityFast.toFixed(3));
   card.difficulty = Number(difficulty.toFixed(3));
   card.elapsedDays = Number(elapsedDays.toFixed(6));
   card.scheduledDays = Number(intervalDays.toFixed(6));
-  card.retrievability = Number(forgettingCurve(elapsedDays, Math.max(stability, 0.001)).toFixed(4));
+  card.retrievability = Number(retrievability.toFixed(4));
   card.lastReview = now;
   card.due = now + intervalDays * day;
   card.state = state;
   if (Number(card.correctStreak || 0) + (rating > 1 ? 1 : 0) >= requiredCorrectStreak()) {
     card.learnedAt = card.learnedAt || now;
   }
-  card.algorithm = "FSRS-7 benchmark formula";
-  card.parameterSet = "FSRS-7 default weights; recency-ready review log";
+  card.algorithm = "FSRS-7 dual-trace";
+  card.parameterSet = "FSRS-7 34-param defaults from fsrs-rs PR #426";
   card.correctStreak = rating > 1 ? Number(card.correctStreak || 0) + 1 : 0;
   if (rating <= 1) {
     card.lapses = Number(card.lapses || 0) + 1;
@@ -988,6 +1008,7 @@ let demoteSrsCard: string => unit = %raw(`id => {
   const card = cards[id];
   if (!card) return;
   card.stability = Number(Math.max(0.001, Number(card.stability || 0.001) * 0.45).toFixed(3));
+  card.stabilityFast = Number(Math.max(0.001, Number(card.stabilityFast || card.stability || 0.001) * 0.45).toFixed(3));
   card.difficulty = Number(Math.min(10, Number(card.difficulty || 5) + 1.2).toFixed(3));
   card.lapses = Number(card.lapses || 0) + 1;
   card.correctStreak = 0;

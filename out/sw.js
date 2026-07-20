@@ -1,4 +1,4 @@
-const CACHE_NAME = "kanji-learn-v118";
+const CACHE_NAME = "kanji-learn-v120";
 const APP_SHELL = [
   "./",
   "./index.html",

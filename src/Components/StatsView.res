@@ -106,8 +106,13 @@ type credit = {
       },
       {
         name: "Open Spaced Repetition",
-        detail: "FSRS-7 scheduling logic and srs-benchmark comparison reference.",
+        detail: "FSRS-7 scheduling references and benchmark comparison.",
         url: "https://github.com/open-spaced-repetition/srs-benchmark",
+      },
+      {
+        name: "fsrs-rs FSRS-7 PR",
+        detail: "FSRS-7 dual-trace runtime formula and 34-parameter defaults.",
+        url: "https://github.com/open-spaced-repetition/fsrs-rs/pull/426",
       },
       {
         name: "JLPT reference lists",

@@ -24,7 +24,7 @@ Feel free to [Install it](https://developer.mozilla.org/en-US/docs/Web/Progressi
 
 ## Scheduling
 
-Review cards use the FSRS-7 runtime formula from `open-spaced-repetition/srs-benchmark` with the published 35 default weights. The benchmark's `FSRS-7 recency` result is produced by recency-weighted parameter training, so the app also stores a review log suitable for later user-specific recency optimization.
+Review cards use the FSRS-7 dual-trace runtime formula and 34-parameter defaults from `open-spaced-repetition/fsrs-rs` PR #426. Quiz results infer the Again/Hard/Good/Easy rating from correctness and response time, and the app stores a review log suitable for later user-specific optimization.
 
 ## Acknowledgements
 
@@ -51,6 +51,9 @@ Review cards use the FSRS-7 runtime formula from `open-spaced-repetition/srs-ben
 
 - Review scheduling uses FSRS-7 logic informed by Open Spaced Repetition's srs-benchmark:
   https://github.com/open-spaced-repetition/srs-benchmark
+
+- The current FSRS-7 dual-trace runtime is aligned with Open Spaced Repetition's `fsrs-rs` implementation work in PR #426:
+  https://github.com/open-spaced-repetition/fsrs-rs/pull/426
 
 - Modern unofficial JLPT level references are cross-checked against JLPTMatome's current N5-N1 kanji data:
   https://www.jlptmatome.com/
