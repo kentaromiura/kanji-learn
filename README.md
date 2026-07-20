@@ -4,10 +4,10 @@ A PWA prototype for learning kanji through vocabulary context, review flows, and
 
 
 -----
-<img src="screen/learn.png" alt="screenshot of mobile learn page" width="215"> |
-<img src="screen/review.png" alt="screenshot of mobile review page" width="215"> |
-<img src="screen/stats.png" alt="screenshot of mobile stats page" width="215"> |
-<img src="screen/studied.png" alt="screenshot of mobile studied kanji page" width="215">
+<img src="screen/learn.png" alt="screenshot of mobile learn page" width="200"> |
+<img src="screen/review.png" alt="screenshot of mobile review page" width="200"> |
+<img src="screen/stats.png" alt="screenshot of mobile stats page" width="200"> |
+<img src="screen/studied.png" alt="screenshot of mobile studied kanji page" width="200">
 
 
 Available at https://cristian.tokyo/kanji 
