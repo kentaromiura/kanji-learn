@@ -3,7 +3,11 @@
 A PWA prototype for learning kanji through vocabulary context, review flows, and quick recognition drills.
 
 
-![screenshot of mobile learn page](screen/learn.png) ![screenshot of mobile review page](screen/review.png) ![screenshot of mobile stats page](screen/stats.png) ![screenshot of mobile studied page](screen/studied.png)
+-----
+<img src="screen/learn.png" alt="screenshot of mobile learn page" width="215"> |
+<img src="screen/review.png" alt="screenshot of mobile review page" width="215"> |
+<img src="screen/stats.png" alt="screenshot of mobile stats page" width="215"> |
+<img src="screen/studied.png" alt="screenshot of mobile studied kanji page" width="215">
 
 
 Available at https://cristian.tokyo/kanji 
