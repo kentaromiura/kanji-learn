@@ -126,9 +126,8 @@ let make = (
                       Int.toString(dueCount) ++
                       " · learned " ++
                       Int.toString(learnedCount) ++
-                      " · card " ++
-                      Int.toString(reviewOffset + 1) ++
-                      " / " ++ Int.toString(reviewTotal),
+                      " · " ++
+                      Int.toString(reviewTotal) ++ " cards remaining",
                     )}
                   </SmallLabel>
                   <ReviewTitle> {str(srsKindLabel(card.kind))} </ReviewTitle>
