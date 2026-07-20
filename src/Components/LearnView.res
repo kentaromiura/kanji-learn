@@ -72,7 +72,7 @@ let str = React.string
     <LessonPanel>
       <LessonContent>
         <Flashcard>
-          <GlyphPanel> {str(item.kanji)} </GlyphPanel>
+          <GlyphPanel> <KanjiDrawing item /> </GlyphPanel>
           <FlashBody>
             <CardHeader>
               <div>

@@ -72,7 +72,7 @@ let detailCard = (
     }
 
   <StudiedDetailCard>
-    <StudiedDetailGlyphPanel> {str(item.kanji)} </StudiedDetailGlyphPanel>
+    <StudiedDetailGlyphPanel> <KanjiDrawing item /> </StudiedDetailGlyphPanel>
     <StudiedDetailBody>
       <CardHeader>
         <div>

@@ -16,6 +16,9 @@ let stripDomStyleProps: JsxDOM.domProps => JsxDOM.domProps = %raw(`props => {
   const nextProps = {...props};
   delete nextProps.active;
   delete nextProps.good;
+  delete nextProps.radical;
+  delete nextProps.delay;
+  delete nextProps.drawing;
   return nextProps;
 }`)
 

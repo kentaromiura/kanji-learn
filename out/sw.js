@@ -1,4 +1,4 @@
-const CACHE_NAME = "kanji-learn-v120";
+const CACHE_NAME = "kanji-learn-v148";
 const APP_SHELL = [
   "./",
   "./index.html",
@@ -6,6 +6,7 @@ const APP_SHELL = [
   "./out.css",
   "./manifest.webmanifest",
   "./public/icons/cristian-logo.webp",
+  "./public/textures/ryokan-ink-grain-320.png",
   "./public/sounds/plop.ogg",
   "./public/sounds/draw.wav",
   "./public/sounds/error.wav",
