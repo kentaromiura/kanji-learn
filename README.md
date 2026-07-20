@@ -2,6 +2,7 @@
 
 A PWA prototype for learning kanji through vocabulary context, review flows, and quick recognition drills.
 
+![screenshot of mobile learn page](screen/learn.png) ![screenshot of mobile review page](screen/review.png) ![screenshot of mobile stats page](screen/stats.png) ![screenshot of mobile studied page](screen/studied.png)
 ## Data Sources
 
 - Kanji order is intended to follow the local KKLC ordering data.
