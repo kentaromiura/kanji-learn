@@ -1,0 +1,36 @@
+{
+  "name": "kanji-learn",
+  "version": "0.1.0",
+  "description": "PWA for learning kanji with SRS review flows.",
+  "main": "out.js",
+  "author": "Cristian Carlesso <@kentaromiura>",
+  "license": "MIT",
+  "private": true,
+  "devDependencies": {
+    "@babel/core": "^7.26.0",
+    "@emotion/css": "^11.13.5",
+    "esbuild": "^0.28.0",
+    "esbuild-plugin-babel": "^0.2.3",
+    "livereload": "^0.9.3",
+    "nodemon": "^3.1.9",
+    "serve": "^14.2.4"
+  },
+  "dependencies": {
+    "@fattafatta/rescript-jotai": "^0.4.2",
+    "@rescript/core": "1.6.1",
+    "@rescript/react": "^0.12.1",
+    "jotai": "^2.11.3",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "rescript": "11.1.4"
+  },
+  "scripts": {
+    "build": "yarn rescript && NODE_ENV=production node build.mjs",
+    "res:build": "rescript",
+    "res:clean": "rescript clean",
+    "res:dev": "rescript -w",
+    "serve": "serve .",
+    "liverel": "livereload 'out.js,out.css,index.html,manifest.webmanifest,sw.js'",
+    "dev": "yarn liverel&yarn serve&nodemon --ext res --watch ./src --exec \"yarn build\""
+  }
+}

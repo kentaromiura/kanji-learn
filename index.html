@@ -1,0 +1,34 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="theme-color" content="#243126" />
+    <meta name="description" content="Kanji learning PWA with SRS review flows." />
+    <title>Kanji Learn</title>
+    <link rel="manifest" href="manifest.webmanifest" />
+    <style>
+      html,
+      body,
+      #root {
+        margin: 0;
+        min-height: 100%;
+      }
+
+      @media (max-width: 520px) {
+        html,
+        body,
+        #root {
+          height: 100%;
+          overflow: hidden;
+        }
+      }
+    </style>
+    <link rel="stylesheet" href="out.css?v=preserve-reading-hyphen-1" />
+    <script defer src="out.js?v=preserve-reading-hyphen-1"></script>
+  </head>
+  <body>
+    <noscript>Kanji Learn needs JavaScript enabled.</noscript>
+    <div id="root"></div>
+  </body>
+</html>

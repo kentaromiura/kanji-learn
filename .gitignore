@@ -1,0 +1,7 @@
+node_modules
+lib
+*.res.mjs
+out.js
+out.css
+yarn-error.log
+.DS_Store
