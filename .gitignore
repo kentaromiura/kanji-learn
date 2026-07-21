@@ -5,3 +5,6 @@ out.js
 out.css
 yarn-error.log
 .DS_Store
+*.apkg
+*.anki2
+*.anki21

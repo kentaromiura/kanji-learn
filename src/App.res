@@ -16,6 +16,7 @@ let make = () => {
   let (reviewIsLesson, setReviewIsLesson) = React.useState(() => false)
   let (stats, setStats) = React.useState(() => loadReviewStats())
   let (settings, setSettings) = React.useState(() => loadReviewSettings())
+  let (storyCollectionsRevision, setStoryCollectionsRevision) = React.useState(() => 0)
   let startupRouteChecked = React.useRef(false)
   let lessonStart = learnProgress.lessonStart
   let learnOffset = learnProgress.learnOffset
@@ -47,6 +48,7 @@ let make = () => {
   })
 
   let refreshStats = () => setStats(_ => loadReviewStats())
+  let refreshStoryCollections = () => setStoryCollectionsRevision(value => value + 1)
 
   let recordReviewResult = (kind, wasCorrect) => {
     recordReviewEvent(kind, wasCorrect)
@@ -182,7 +184,13 @@ let make = () => {
         </Nav>
       </Sidebar>
       {switch screen {
-      | Learn => <LearnView lessonStart learnOffset onNext={continueLearn} />
+      | Learn =>
+        <LearnView
+          lessonStart
+          learnOffset
+          storyCollectionsRevision
+          onNext={continueLearn}
+        />
       | Review =>
         <ReviewView
           card={currentReviewCard}
@@ -204,8 +212,14 @@ let make = () => {
           onSettingsChange={updateSettings}
           onShowStudied={() => goToScreen(Studied)}
           onDataImported={finishDataImport}
+          onStoryCollectionsChanged={refreshStoryCollections}
         />
-      | Studied => <StudiedView nextStudy onShowStats={() => goToScreen(Stats)} />
+      | Studied =>
+        <StudiedView
+          nextStudy
+          storyCollectionsRevision
+          onShowStats={() => goToScreen(Stats)}
+        />
       }}
     </Workspace>
   </Shell>

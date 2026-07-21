@@ -387,7 +387,8 @@ let exportUserData: unit => unit = %raw(`() => {
     "kanji-learn-srs-cards-v1",
     "kanji-learn-srs-review-log-v1",
     "kanji-learn-srs-answer-times-v1",
-    "kanji-learn-learn-progress-v1"
+    "kanji-learn-learn-progress-v1",
+    "kanji-learn-story-collections-v1"
   ];
   const localStorageData = {};
   for (const key of keys) {
@@ -419,7 +420,8 @@ let importUserData: (unit => unit) => unit = %raw(`onDone => {
     "kanji-learn-srs-cards-v1",
     "kanji-learn-srs-review-log-v1",
     "kanji-learn-srs-answer-times-v1",
-    "kanji-learn-learn-progress-v1"
+    "kanji-learn-learn-progress-v1",
+    "kanji-learn-story-collections-v1"
   ];
   const input = document.createElement("input");
   input.type = "file";

@@ -5,7 +5,7 @@ open Srs
 let str = React.string
 
 @react.component
-  let make = (~lessonStart, ~learnOffset, ~onNext) => {
+  let make = (~lessonStart, ~learnOffset, ~storyCollectionsRevision, ~onNext) => {
     let item = itemAt(lessonStart + learnOffset)
     let (selectedExample, setSelectedExample) = React.useState(() => 0)
     let (mode, setMode) = React.useState(() => KanjiToMeaning)
@@ -116,14 +116,11 @@ let str = React.string
             <DetailLine>
               {str(detailText)}
             </DetailLine>
-            {switch mnemonic {
-            | Some(text) =>
-              <MemoryCue>
-                <SmallLabel> {str("Memory cue")} </SmallLabel>
-                <DetailLine> {str(text)} </DetailLine>
-              </MemoryCue>
-            | None => React.null
-            }}
+            <StoryCarousel
+              key={item.kanji ++ "-" ++ Int.toString(storyCollectionsRevision)}
+              kanji={item.kanji}
+              memoryCue={mnemonic}
+            />
             <WordDeck>
               {item.examples
               ->Array.mapWithIndex((example, index) => {
