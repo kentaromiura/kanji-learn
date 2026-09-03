@@ -4,6 +4,21 @@ open Srs
 
 let str = React.string
 
+let handleAdvanceLearn = %raw(`
+  (event, onNext) => {
+    if (!event || event.key !== "ArrowRight") return;
+    event.preventDefault();
+    onNext();
+  }
+`)
+
+let addKeydownListener = %raw(`
+  handler => {
+    window.addEventListener("keydown", handler);
+    return () => window.removeEventListener("keydown", handler);
+  }
+`)
+
 @react.component
   let make = (~lessonStart, ~learnOffset, ~onNext) => {
     let item = itemAt(lessonStart + learnOffset)
@@ -68,6 +83,14 @@ let str = React.string
       } else {
         Some(item.reading)
       }
+
+    React.useEffect1(() => {
+      let onKeyDown = event => {
+        handleAdvanceLearn(event, onNext)
+      }
+      let cleanup = addKeydownListener(onKeyDown)
+      Some(cleanup)
+    }, [onNext])
 
     <LessonPanel>
       <LessonContent>

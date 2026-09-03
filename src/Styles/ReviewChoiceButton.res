@@ -4,6 +4,9 @@ type props = {...JsxDOM.domProps, status: string}
 
 let baseClass = Html.css`
   appearance: none;
+  display: flex;
+  align-items: center;
+  gap: 12px;
   min-height: 58px;
   border: 1px solid rgba(33,52,42,.16);
   border-radius: 8px;
@@ -18,6 +21,10 @@ let baseClass = Html.css`
   overflow-wrap: anywhere;
   transition: background .18s ease, border-color .18s ease, transform .18s ease;
 
+  & > span:last-child {
+    flex: 1;
+  }
+
   &:disabled {
     cursor: default;
   }
@@ -26,6 +33,26 @@ let baseClass = Html.css`
     min-height: 46px;
     padding: 0 10px;
     font-size: 14px;
+  }
+`
+
+let shortcutBadgeClass = Html.css`
+  display: none;
+
+  @media (min-width: 521px) {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 22px;
+    height: 22px;
+    border-radius: 6px;
+    border: 1px solid rgba(33,52,42,.16);
+    background: rgba(33,52,42,.06);
+    color: rgba(33,52,42,.72);
+    font-size: 12px;
+    font-weight: 800;
+    line-height: 1;
+    flex-shrink: 0;
   }
 `
 

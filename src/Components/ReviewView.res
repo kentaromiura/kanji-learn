@@ -4,6 +4,34 @@ open Constants
 
 let str = React.string
 
+let handleKeyBoardShortcutAnswer = %raw(`
+  (event, options, disabled, choose, onAdvance) => {
+    if (!event) return;
+    const key = event.key;
+
+    if (key === "ArrowRight") {
+      if (!disabled) return;
+      event.preventDefault();
+      onAdvance();
+      return;
+    }
+
+    if (!["1", "2", "3", "4"].includes(key)) return;
+    if (disabled) return;
+    const answer = options[Number(key) - 1];
+    if (!answer) return;
+    event.preventDefault();
+    choose(answer);
+  }
+`)
+
+let addKeydownListener = %raw(`
+  handler => {
+    window.addEventListener("keydown", handler);
+    return () => window.removeEventListener("keydown", handler);
+  }
+`)
+
 type selectedAnswer = {
   cardId: string,
   answer: string,
@@ -114,6 +142,23 @@ let make = (
           Runtime.afterDelay(reviewAutoAdvanceMs, () => submitAnswer(answer, now -. startedAt, false))
         }
       }
+      React.useEffect2(() => {
+        let onKeyDown = event => {
+          handleKeyBoardShortcutAnswer(
+            event,
+            options,
+            isAnswered,
+            answer => chooseAnswer(answer),
+            () =>
+              switch selectedForCard {
+              | Some(answer) => submitAnswer(answer, answeredAt -. startedAt, true)
+              | None => ()
+              },
+          )
+        }
+        let cleanup = addKeydownListener(onKeyDown)
+        Some(cleanup)
+      }, (options, isAnswered))
       <LessonPanel>
         <LessonContent>
           <ReviewPanel>
@@ -150,7 +195,7 @@ let make = (
                 </PromptBox>
                 <ReviewChoices>
                   {options
-                  ->Array.map(answer => {
+                  ->Array.mapWithIndex((answer, index) => {
                     let status =
                       switch selectedForCard {
                       | None => "neutral"
@@ -163,13 +208,15 @@ let make = (
                           "neutral"
                         }
                       }
+                    let shortcutValue = Int.toString(index + 1)
                     <ReviewChoiceButton
                       key={card.id ++ answer}
                       status
                       disabled={isAnswered}
                       onClick={_ => chooseAnswer(answer)}
                     >
-                      {str(answer)}
+                      <span className={ReviewChoiceButton.shortcutBadgeClass}> {str(shortcutValue)} </span>
+                      <span> {str(answer)} </span>
                     </ReviewChoiceButton>
                   })
                   ->React.array}
