@@ -28,6 +28,8 @@ Review cards use the FSRS-7 dual-trace runtime formula and 34-parameter defaults
 
 ## Acknowledgements
 
+- Thanks to Damien Bidaud for contributing keyboard controls for the learn and review flows.
+
 - KanjiVG by Ulrich Apel provides stroke, drawing, and radical-structure data. KanjiVG is licensed CC BY-SA 3.0:
   https://kanjivg.tagaini.net/
 

@@ -32,6 +32,20 @@ let addKeydownListener = %raw(`
   }
 `)
 
+module ReviewKeyboard = {
+  @react.component
+  let make = (~options, ~isAnswered, ~onChoose, ~onAdvance) => {
+    React.useEffect2(() => {
+      let onKeyDown = event => {
+        handleKeyBoardShortcutAnswer(event, options, isAnswered, onChoose, onAdvance)
+      }
+      let cleanup = addKeydownListener(onKeyDown)
+      Some(cleanup)
+    }, (options, isAnswered))
+    React.null
+  }
+}
+
 type selectedAnswer = {
   cardId: string,
   answer: string,
@@ -121,8 +135,8 @@ let make = (
         }
       let progress = clampedPercentStyle(reviewOffset + 1, reviewTotal)
       let streakAfterCorrect = card.correctStreak + 1
-      let submitAnswer = (answer, elapsedMs, force) => {
-        if submittedRef.current && !force {
+      let submitAnswer = (answer, elapsedMs, _force) => {
+        if submittedRef.current {
           ()
         } else {
           submittedRef.current = true
@@ -142,25 +156,18 @@ let make = (
           Runtime.afterDelay(reviewAutoAdvanceMs, () => submitAnswer(answer, now -. startedAt, false))
         }
       }
-      React.useEffect2(() => {
-        let onKeyDown = event => {
-          handleKeyBoardShortcutAnswer(
-            event,
-            options,
-            isAnswered,
-            answer => chooseAnswer(answer),
-            () =>
+      <LessonPanel>
+        <LessonContent>
+          <ReviewKeyboard
+            options
+            isAnswered
+            onChoose={answer => chooseAnswer(answer)}
+            onAdvance={() =>
               switch selectedForCard {
               | Some(answer) => submitAnswer(answer, answeredAt -. startedAt, true)
               | None => ()
-              },
-          )
-        }
-        let cleanup = addKeydownListener(onKeyDown)
-        Some(cleanup)
-      }, (options, isAnswered))
-      <LessonPanel>
-        <LessonContent>
+              }}
+          />
           <ReviewPanel>
             <div>
               <ReviewTopbar>
