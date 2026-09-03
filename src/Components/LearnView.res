@@ -5,8 +5,15 @@ open Srs
 let str = React.string
 
 let handleAdvanceLearn = %raw(`
-  (event, onNext) => {
-    if (!event || event.key !== "ArrowRight") return;
+  (event, onBack, onNext, canGoBack) => {
+    if (!event) return;
+    if (event.key === "ArrowLeft") {
+      if (!canGoBack) return;
+      event.preventDefault();
+      onBack();
+      return;
+    }
+    if (event.key !== "ArrowRight") return;
     event.preventDefault();
     onNext();
   }
@@ -86,7 +93,7 @@ let addKeydownListener = %raw(`
 
     React.useEffect1(() => {
       let onKeyDown = event => {
-        handleAdvanceLearn(event, onNext)
+        handleAdvanceLearn(event, onBack, onNext, learnOffset > 0)
       }
       let cleanup = addKeydownListener(onKeyDown)
       Some(cleanup)
