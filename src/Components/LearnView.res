@@ -5,7 +5,7 @@ open Srs
 let str = React.string
 
 @react.component
-  let make = (~lessonStart, ~learnOffset, ~storyCollectionsRevision, ~onNext) => {
+  let make = (~lessonStart, ~learnOffset, ~storyCollectionsRevision, ~onBack, ~onNext) => {
     let item = itemAt(lessonStart + learnOffset)
     let (selectedExample, setSelectedExample) = React.useState(() => 0)
     let (mode, setMode) = React.useState(() => KanjiToMeaning)
@@ -139,6 +139,16 @@ let str = React.string
         </Flashcard>
       </LessonContent>
       <BottomAction>
+        {if learnOffset > 0 {
+          <PreviousButton onClick={_ => {
+            Runtime.playInterfaceClick()
+            onBack()
+          }}>
+            {str("Back")}
+          </PreviousButton>
+        } else {
+          React.null
+        }}
         <NextButton onClick={_ => {
           Runtime.playInterfaceClick()
           onNext()

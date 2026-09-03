@@ -100,6 +100,18 @@ let make = () => {
     }
   }
 
+  let previousLearn = () => {
+    setLearnProgress(progress => {
+      if progress.learnOffset <= 0 {
+        progress
+      } else {
+        let next = {...progress, learnOffset: progress.learnOffset - 1}
+        saveLearnProgress(next)
+        next
+      }
+    })
+  }
+
   let finishReviewBatch = () => {
     setLearnProgress(progress => {
       let next = {lessonStart: progress.lessonStart + lessonBatchSize, learnOffset: 0}
@@ -189,6 +201,7 @@ let make = () => {
           lessonStart
           learnOffset
           storyCollectionsRevision
+          onBack={previousLearn}
           onNext={continueLearn}
         />
       | Review =>

@@ -23,7 +23,7 @@ let baseClass = Html.css`
     }
 
     @media (max-width: 520px) {
-      width: 100%;
+      min-width: 0;
       min-height: 42px;
     }
   `
