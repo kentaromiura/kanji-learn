@@ -4,11 +4,11 @@ let make = styled(
   Dom("div"),
   Html.css`
     display: grid;
+    grid-template-rows: auto minmax(38px, auto) auto auto minmax(0, 1fr);
     gap: 12px;
     align-content: start;
     min-height: 0;
-    overflow-y: auto;
-    overscroll-behavior: contain;
+    overflow: hidden;
     padding: 18px;
     scrollbar-width: thin;
 

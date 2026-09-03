@@ -20,7 +20,7 @@ let addKeydownListener = %raw(`
 `)
 
 @react.component
-  let make = (~lessonStart, ~learnOffset, ~onNext) => {
+  let make = (~lessonStart, ~learnOffset, ~storyCollectionsRevision, ~onBack, ~onNext) => {
     let item = itemAt(lessonStart + learnOffset)
     let (selectedExample, setSelectedExample) = React.useState(() => 0)
     let (mode, setMode) = React.useState(() => KanjiToMeaning)
@@ -139,14 +139,11 @@ let addKeydownListener = %raw(`
             <DetailLine>
               {str(detailText)}
             </DetailLine>
-            {switch mnemonic {
-            | Some(text) =>
-              <MemoryCue>
-                <SmallLabel> {str("Memory cue")} </SmallLabel>
-                <DetailLine> {str(text)} </DetailLine>
-              </MemoryCue>
-            | None => React.null
-            }}
+            <StoryCarousel
+              key={item.kanji ++ "-" ++ Int.toString(storyCollectionsRevision)}
+              kanji={item.kanji}
+              memoryCue={mnemonic}
+            />
             <WordDeck>
               {item.examples
               ->Array.mapWithIndex((example, index) => {
@@ -165,6 +162,16 @@ let addKeydownListener = %raw(`
         </Flashcard>
       </LessonContent>
       <BottomAction>
+        {if learnOffset > 0 {
+          <PreviousButton onClick={_ => {
+            Runtime.playInterfaceClick()
+            onBack()
+          }}>
+            {str("Back")}
+          </PreviousButton>
+        } else {
+          React.null
+        }}
         <NextButton onClick={_ => {
           Runtime.playInterfaceClick()
           onNext()

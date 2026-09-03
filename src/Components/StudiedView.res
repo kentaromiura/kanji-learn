@@ -9,6 +9,7 @@ let detailCard = (
   setSelectedExample,
   mode,
   setMode,
+  storyCollectionsRevision,
 ) => {
   let example = Learning.exampleAt(item, selectedExample)
   let schedule = cardScheduleForKanji(item.kanji)
@@ -71,7 +72,7 @@ let detailCard = (
       Some(item.reading)
     }
 
-  <StudiedDetailCard>
+  <StudiedDetailCard key={item.kanji}>
     <StudiedDetailGlyphPanel> <KanjiDrawing item /> </StudiedDetailGlyphPanel>
     <StudiedDetailBody>
       <CardHeader>
@@ -87,7 +88,7 @@ let detailCard = (
           <MemoryLantern stage={lanternStage} />
         </CardTools>
       </CardHeader>
-      <ModeTabs>
+      <StudiedModeTabs>
         {modes
         ->Array.map(learnMode => {
           let active = learnMode == activeMode
@@ -100,7 +101,7 @@ let detailCard = (
           </ModeButton>
         })
         ->React.array}
-      </ModeTabs>
+      </StudiedModeTabs>
       <StudiedPromptAnswer>
         <StudiedPromptBox tone={promptTone}>
           <SmallLabel> {str(promptLabel)} </SmallLabel>
@@ -112,48 +113,47 @@ let detailCard = (
         </StudiedAnswerBox>
       </StudiedPromptAnswer>
       <DetailLine> {str(detailText)} </DetailLine>
-      {switch mnemonic {
-      | Some(text) =>
-        <MemoryCue>
-          <SmallLabel> {str("Memory cue")} </SmallLabel>
-          <DetailLine> {str(text)} </DetailLine>
-        </MemoryCue>
-      | None => React.null
-      }}
-      <WordDeck>
-        {item.examples
-        ->Array.mapWithIndex((example, index) => {
-          let active = index == selectedExample
-          <WordButton
-            key={example.word}
-            active
-            onClick={_ => setSelectedExample(_ => index)}
-          >
-            {str(example.word)}
-          </WordButton>
-        })
-        ->React.array}
-      </WordDeck>
-      {if Array.length(schedule) <= 0 {
-        React.null
-      } else {
-        <SchedulePanel>
-          <SmallLabel> {str("Next schedule")} </SmallLabel>
-          <ScheduleList>
-            {schedule
-            ->Array.map(row => {
-              <ScheduleRow key={row.kind}>
-                <span> {str(row.label)} </span>
-                <ScheduleBar>
-                  <ScheduleFill style={ReactDOMStyle.make(~width=row.fill, ())} />
-                </ScheduleBar>
-                <span> {str(row.dueLabel)} </span>
-              </ScheduleRow>
-            })
-            ->React.array}
-          </ScheduleList>
-        </SchedulePanel>
-      }}
+      <StudiedDetailExtras>
+        <StoryCarousel
+          key={item.kanji ++ "-" ++ Int.toString(storyCollectionsRevision)}
+          kanji={item.kanji}
+          memoryCue={mnemonic}
+        />
+        <WordDeck>
+          {item.examples
+          ->Array.mapWithIndex((example, index) => {
+            let active = index == selectedExample
+            <WordButton
+              key={example.word}
+              active
+              onClick={_ => setSelectedExample(_ => index)}
+            >
+              {str(example.word)}
+            </WordButton>
+          })
+          ->React.array}
+        </WordDeck>
+        {if Array.length(schedule) <= 0 {
+          React.null
+        } else {
+          <SchedulePanel>
+            <SmallLabel> {str("Next schedule")} </SmallLabel>
+            <ScheduleList>
+              {schedule
+              ->Array.map(row => {
+                <ScheduleRow key={row.kind}>
+                  <span> {str(row.label)} </span>
+                  <ScheduleBar>
+                    <ScheduleFill style={ReactDOMStyle.make(~width=row.fill, ())} />
+                  </ScheduleBar>
+                  <span> {str(row.dueLabel)} </span>
+                </ScheduleRow>
+              })
+              ->React.array}
+            </ScheduleList>
+          </SchedulePanel>
+        }}
+      </StudiedDetailExtras>
     </StudiedDetailBody>
   </StudiedDetailCard>
 }
@@ -166,7 +166,7 @@ let progressWidth = item =>
   Learning.clampedPercentStyle(item.learnedCards, item.totalCards)
 
 @react.component
-let make = (~nextStudy: array<studyPreview>, ~onShowStats) => {
+let make = (~nextStudy: array<studyPreview>, ~storyCollectionsRevision, ~onShowStats) => {
   let items = studiedKanjiList()
   let seen = Array.length(items)
   let (selectedKanji, setSelectedKanji) = React.useState(() => None)
@@ -178,7 +178,7 @@ let make = (~nextStudy: array<studyPreview>, ~onShowStats) => {
     None
   }, [selectedKanji])
 
-  <StatsPanel>
+  <StudiedPanel>
     {switch selectedKanji {
     | Some(kanji) =>
       <>
@@ -187,12 +187,6 @@ let make = (~nextStudy: array<studyPreview>, ~onShowStats) => {
           <ModeTabs>
             <ModeButton active=false onClick={_ => onShowStats()}> {str("Stats")} </ModeButton>
             <ModeButton active=true onClick={_ => ()}> {str("Studied")} </ModeButton>
-            <ModeButton active=false onClick={_ => {
-              Runtime.playInterfaceClick()
-              setSelectedKanji(_ => None)
-            }}>
-              {str("Back")}
-            </ModeButton>
           </ModeTabs>
         </StudiedHeaderBar>
         {detailCard(
@@ -201,6 +195,7 @@ let make = (~nextStudy: array<studyPreview>, ~onShowStats) => {
           setSelectedExample,
           mode,
           setMode,
+          storyCollectionsRevision,
         )}
       </>
     | None =>
@@ -301,5 +296,5 @@ let make = (~nextStudy: array<studyPreview>, ~onShowStats) => {
         }}
       </>
     }}
-  </StatsPanel>
+  </StudiedPanel>
 }

@@ -21,6 +21,7 @@ Feel free to [Install it](https://developer.mozilla.org/en-US/docs/Web/Progressi
 - Stroke/radical rendering is intended to use KanjiVG data.
 - Mnemonic text may use the Ulrike Joy o' Kanji mnemonic data JSON at `https://japanesestudies.github.io/joyo-kanji/complete-ulrike-joyo-kanji.json`.
 - Text coverage estimates use the Topokanji kanji-frequency corpora for Aozora, news, Twitter, and Wikipedia.
+- Story collections are user-imported JSON files. They are not bundled with the app; see `docs/story-collection-format.md` for the portable collection shape.
 
 ## Scheduling
 

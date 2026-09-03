@@ -19,11 +19,13 @@ type credit = {
     ~onSettingsChange,
     ~onShowStudied,
     ~onDataImported,
+    ~onStoryCollectionsChanged,
   ) => {
     let learned = if learnedCount > kanjiMasteryTarget {kanjiMasteryTarget} else {learnedCount}
     let totalReviews = stats.correct + stats.wrong
     let last100Wrong = stats.last100Total - stats.last100Correct
     let chartStats = loadKanjiChartStats()
+    let storyCollections = StoryCollections.listCollections()
     let setRequiredStreak = value =>
       onSettingsChange({...settings, requiredCorrectStreak: value})
     let quickReviewKindChoices = [
@@ -153,6 +155,85 @@ type credit = {
           </CreditLink>
         </CreditTitleLine>
         <DetailLine> {str(credit.detail)} </DetailLine>
+      </CreditItem>
+    let collectionRow = (collection: StoryCollections.collection) =>
+      <CreditItem key={collection.id}>
+        <CreditTitleLine>
+          {switch collection.sourceUrl {
+          | Some(url) =>
+            <CreditLink href={url} target="_blank" rel="noreferrer">
+              {str(collection.collectionName)}
+            </CreditLink>
+          | None => <span> {str(collection.collectionName)} </span>
+          }}
+        </CreditTitleLine>
+        <DetailLine>
+          {str(
+            Int.toString(collection.storyCount) ++
+            " imported stories" ++
+            (switch collection.attribution {
+            | Some(attribution) => ". " ++ attribution
+            | None => "."
+            }),
+          )}
+        </DetailLine>
+        <StoryCollectionActions>
+          {switch collection.licenseUrl {
+          | Some(url) =>
+            <CreditLink href={url} target="_blank" rel="noreferrer">
+              {str(collection.licenseName)}
+            </CreditLink>
+          | None => <Muted> {str(collection.licenseName)} </Muted>
+          }}
+          <ModeButton
+            active={collection.visible}
+            onClick={_ => {
+              Runtime.playInterfaceClick()
+              StoryCollections.setCollectionVisible(collection.id, !collection.visible)
+              onStoryCollectionsChanged()
+            }}
+          >
+            {str(if collection.visible {"Shown"} else {"Hidden"})}
+          </ModeButton>
+          <ModeButton
+            active=false
+            onClick={_ => {
+              StoryCollections.removeCollection(collection.id)
+              onStoryCollectionsChanged()
+            }}
+          >
+            {str("Remove")}
+          </ModeButton>
+        </StoryCollectionActions>
+      </CreditItem>
+    let collectionCreditRow = (collection: StoryCollections.collection) =>
+      <CreditItem key={collection.id}>
+        <CreditTitleLine>
+          {switch collection.sourceUrl {
+          | Some(url) =>
+            <CreditLink href={url} target="_blank" rel="noreferrer">
+              {str(collection.collectionName)}
+            </CreditLink>
+          | None => <span> {str(collection.collectionName)} </span>
+          }}
+        </CreditTitleLine>
+        <DetailLine>
+          {str(
+            Int.toString(collection.storyCount) ++
+            " user-imported stories" ++
+            (switch collection.attribution {
+            | Some(attribution) => ". " ++ attribution
+            | None => "."
+            }),
+          )}
+        </DetailLine>
+        {switch collection.licenseUrl {
+        | Some(url) =>
+          <CreditLink href={url} target="_blank" rel="noreferrer">
+            {str(collection.licenseName)}
+          </CreditLink>
+        | None => <Muted> {str(collection.licenseName)} </Muted>
+        }}
       </CreditItem>
 
     <StatsPanel>
@@ -310,7 +391,23 @@ type credit = {
           </ModeTabs>
           <DetailLine> {str("Move progress, stats, and options between devices")} </DetailLine>
         </StatCard>
+        <StatCard>
+          <SmallLabel> {str("Story collections")} </SmallLabel>
+          <StatNumber> {str(Int.toString(Array.length(storyCollections)))} </StatNumber>
+          <ModeTabs>
+            <PrimaryButton onClick={_ => StoryCollections.importStoryCollection(onStoryCollectionsChanged)}>
+              {str("Import stories")}
+            </PrimaryButton>
+          </ModeTabs>
+          <DetailLine> {str("Add a separate collection JSON from this device")} </DetailLine>
+        </StatCard>
       </StatsGrid>
+      {Array.length(storyCollections) <= 0
+        ? React.null
+        : <CreditsPanel>
+            <SmallLabel> {str("Imported story collections")} </SmallLabel>
+            <CreditList> {storyCollections->Array.map(collectionRow)->React.array} </CreditList>
+          </CreditsPanel>}
       <SplitList>
         {[
           countRow("Due kanji -> kana", dashboard.kanjiToKanaDue),
@@ -328,6 +425,12 @@ type credit = {
       <CreditsPanel>
         <SmallLabel> {str("Credits and licenses")} </SmallLabel>
         <CreditList> {credits->Array.map(creditRow)->React.array} </CreditList>
+        {Array.length(storyCollections) <= 0
+          ? React.null
+          : <>
+              <SmallLabel> {str("Imported story licenses")} </SmallLabel>
+              <CreditList> {storyCollections->Array.map(collectionCreditRow)->React.array} </CreditList>
+            </>}
         <DetailLine>
           {str("This app is not affiliated with the projects above; they are credited for source data, references, algorithms, and audio assets used or planned in the learning experience.")}
         </DetailLine>
