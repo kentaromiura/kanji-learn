@@ -1,4 +1,4 @@
-const CACHE_NAME = "kanji-learn-v156";
+const CACHE_NAME = "kanji-learn-v157";
 const APP_SHELL = [
   "./",
   "./index.html",
@@ -13,6 +13,21 @@ const APP_SHELL = [
   "./public/sounds/play-card.wav",
   "./public/icons/icon.svg"
 ];
+
+const NETWORK_TIMEOUT_MS = 3000;
+
+const fetchWithTimeout = request =>
+  Promise.race([
+    fetch(request),
+    new Promise((_, reject) =>
+      setTimeout(() => reject(new Error("Network request timed out")), NETWORK_TIMEOUT_MS)
+    )
+  ]);
+
+const cachedResponse = request =>
+  caches.match(request, {ignoreSearch: true}).then(cached =>
+    cached || caches.match("./index.html", {ignoreSearch: true})
+  );
 
 self.addEventListener("install", event => {
   event.waitUntil(caches.open(CACHE_NAME).then(cache => cache.addAll(APP_SHELL)));
@@ -38,15 +53,15 @@ self.addEventListener("fetch", event => {
 
   if (networkFirst) {
     event.respondWith(
-      fetch(event.request).catch(() => caches.match(event.request).then(cached => cached || caches.match("./index.html")))
+      fetchWithTimeout(event.request).catch(() => cachedResponse(event.request))
     );
     return;
   }
 
   event.respondWith(
-    caches.match(event.request).then(cached => {
+    caches.match(event.request, {ignoreSearch: true}).then(cached => {
       if (cached) return cached;
-      return fetch(event.request);
-    }).catch(() => caches.match("./index.html"))
+      return fetchWithTimeout(event.request);
+    }).catch(() => cachedResponse(event.request))
   );
 });
