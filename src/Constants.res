@@ -1,4 +1,5 @@
 let lessonBatchSize = 4
+let appVersion = "v160"
 let kanjiMasteryTarget = 2300
 let batchSize = 15
 let maxMistakes = 3

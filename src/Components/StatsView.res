@@ -389,7 +389,9 @@ type credit = {
             <PrimaryButton onClick={_ => exportUserData()}> {str("Export")} </PrimaryButton>
             <PrimaryButton onClick={_ => importUserData(onDataImported)}> {str("Import")} </PrimaryButton>
           </ModeTabs>
-          <DetailLine> {str("Move progress, stats, and options between devices")} </DetailLine>
+          <DetailLine>
+            {str("Build " ++ appVersion ++ " · move progress, stats, and options between devices")}
+          </DetailLine>
         </StatCard>
         <StatCard>
           <SmallLabel> {str("Story collections")} </SmallLabel>

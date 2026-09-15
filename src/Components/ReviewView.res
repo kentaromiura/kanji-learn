@@ -66,7 +66,7 @@ let make = (
   let (answeredAt, setAnsweredAt) = React.useState(() => 0.0)
   let (startedAt, setStartedAt) = React.useState(() => Runtime.nowMs())
   let (autoAdvancing, setAutoAdvancing) = React.useState(() => false)
-  let submittedRef = React.useRef(false)
+  let submittedCardKeyRef = React.useRef("")
 
   let currentKey =
     switch card {
@@ -86,7 +86,6 @@ let make = (
     setAnsweredAt(_ => 0.0)
     setStartedAt(_ => Runtime.nowMs())
     setAutoAdvancing(_ => false)
-    submittedRef.current = false
     None
   }, [currentKey])
 
@@ -136,10 +135,10 @@ let make = (
       let progress = clampedPercentStyle(reviewOffset + 1, reviewTotal)
       let streakAfterCorrect = card.correctStreak + 1
       let submitAnswer = (answer, elapsedMs, _force) => {
-        if submittedRef.current {
+        if submittedCardKeyRef.current == currentKey {
           ()
         } else {
-          submittedRef.current = true
+          submittedCardKeyRef.current = currentKey
           // Clear the outgoing card's pulse before its replacement mounts.
           setAutoAdvancing(_ => false)
           onAnswer(answer == correctAnswer, elapsedMs)
