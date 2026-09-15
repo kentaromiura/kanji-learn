@@ -140,9 +140,8 @@ let make = (
           ()
         } else {
           submittedRef.current = true
-          if answer == correctAnswer {
-            setAutoAdvancing(_ => true)
-          }
+          // Clear the outgoing card's pulse before its replacement mounts.
+          setAutoAdvancing(_ => false)
           onAnswer(answer == correctAnswer, elapsedMs)
         }
       }

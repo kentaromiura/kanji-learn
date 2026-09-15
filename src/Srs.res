@@ -435,19 +435,32 @@ let importUserData: (unit => unit) => unit = %raw(`onDone => {
         const parsed = JSON.parse(String(reader.result || "{}"));
         const source = parsed && parsed.localStorage ? parsed.localStorage : parsed;
         if (!source || typeof source !== "object") throw new Error("Invalid backup file");
-        let imported = 0;
+        const importedData = {};
         for (const key of keys) {
           const value = source[key];
           if (typeof value === "string") {
-            JSON.parse(value);
-            window.localStorage.setItem(key, value);
-            imported += 1;
+            const parsedValue = JSON.parse(value);
+            importedData[key] = key === "kanji-learn-srs-review-log-v1" && Array.isArray(parsedValue)
+              ? JSON.stringify(parsedValue.slice(-1000))
+              : value;
           } else if (value != null && typeof value === "object") {
-            window.localStorage.setItem(key, JSON.stringify(value));
-            imported += 1;
+            importedData[key] = key === "kanji-learn-srs-review-log-v1" && Array.isArray(value)
+              ? JSON.stringify(value.slice(-1000))
+              : JSON.stringify(value);
           }
         }
-        if (!imported) throw new Error("No Kanji Learn data found");
+        if (!Object.keys(importedData).length) throw new Error("No Kanji Learn data found");
+        const previousData = Object.fromEntries(keys.map(key => [key, window.localStorage.getItem(key)]));
+        try {
+          keys.forEach(key => window.localStorage.removeItem(key));
+          Object.entries(importedData).forEach(([key, value]) => window.localStorage.setItem(key, value));
+        } catch (error) {
+          keys.forEach(key => window.localStorage.removeItem(key));
+          Object.entries(previousData).forEach(([key, value]) => {
+            if (value != null) window.localStorage.setItem(key, value);
+          });
+          throw error;
+        }
         if (typeof onDone === "function") onDone();
       } catch (error) {
         window.alert(error && error.message ? error.message : "Could not import Kanji Learn backup");
@@ -998,7 +1011,7 @@ let gradeSrsCard: (string, int) => unit = %raw(`(id, rating) => {
     difficulty: card.difficulty,
     scheduledDays: card.scheduledDays
   });
-  window.localStorage.setItem(logKey, JSON.stringify(logs.slice(-5000)));
+  window.localStorage.setItem(logKey, JSON.stringify(logs.slice(-1000)));
 }`)
 
 let demoteSrsCard: string => unit = %raw(`id => {
